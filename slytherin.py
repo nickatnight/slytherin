@@ -5,13 +5,38 @@ from menu import Menu
 
 
 class Sly:
-    """ Game engine for Snake """
+    """
+    Game engine for Snake
+
+    Attributes:
+        display: the dimensions of the playing screen
+        pallet: the parent window that will display the game
+    """
 
     def __init__(self, display, pallet):
+        """
+        Returns a new instace of Sly object
+
+        Global Variables:
+            white: the color of snake
+            dx: position of snake on the x-axis
+            dy: position of snake on the y-axis
+            snakelist: holds coords of each block in snakes boundry_check
+            speed: speed of snake
+            direction: direction the snake is moving
+            img: png of snake head
+            apple_img: png of apple
+            snakeLength: length of the snake
+            game_menu: instantiation of menu object
+            apple_x: x coord of apple
+            apply_y: y coord of apple
+            score: user score
+        """
+
         pygame.init()
         self.display = display
-        self.white = (255, 255, 255)
         self.pallet = pallet
+        self.white = (255, 255, 255)        
         self.dx = 200
         self.dy = 200
         self.snakelist = []
@@ -23,9 +48,12 @@ class Sly:
         self.game_menu = Menu(display, pallet)
         self.apple_x = None
         self.apple_y = None
+        self.score = 0
 
     def snake(self):
-        """ Logic for the snake creation """
+        """
+        Logic for the snake creation
+        """
 
         snakeHead = []
         dir_dict = {
@@ -56,10 +84,18 @@ class Sly:
             pygame.draw.rect(self.pallet, (0, 255, 0), [xy[0], xy[1], 10, 10])
 
     def apple_init(self):
+        """
+        Initiates new coordinates for apple
+        """
         self.apple_x = round(random.randrange(0, self.display[0]-10) / 10.0) * 10.0
         self.apple_y = round(random.randrange(0, self.display[1]-10) / 10.0) * 10.0
 
     def apple(self, op):
+        """
+        Logic for the apple placement with 2 choices for *op*
+            place-place the apple in a new location
+            check-check if the snake head is the same location as the apple
+        """
         if op == "place":
             self.pallet.blit(self.apple_img, [self.apple_x, self.apple_y])
 
@@ -68,8 +104,13 @@ class Sly:
                     self.apple_init()
                     self.snakeLength += 1
                     self.speed += 1
+                    self.score = self.snakeLength * 10 + self.speed
 
     def boundry_check(self):
+        """
+        Check if snake is off screen by comparing the positions with the
+        display lengths
+        """
         if self.dx >= self.display[0] or self.dx < 0 or self.dy >= \
                     self.display[1] or self.dy < 0:
             return True
@@ -77,6 +118,9 @@ class Sly:
             return False
 
     def game_loop(self, dx_rst, dy_rst, block):
+        """
+        Loop for game animation and play
+        """
         clock = pygame.time.Clock()
         exit_game = False
         game_over = False
@@ -91,6 +135,7 @@ class Sly:
 
         while not exit_game:
             for event in pygame.event.get():
+                #print self.score
                 if event.type == pygame.QUIT:
                     exit_game = True
                 if event.type == pygame.KEYDOWN:
@@ -128,6 +173,9 @@ class Sly:
 
             self.snake()
 
+            surfScore = pygame.font.SysFont("Arial", 20, bold=True).render(str(self.score), True, self.white)
+            self.pallet.blit(surfScore, (10,10))
+            
             pygame.display.update()
 
             self.apple("check")
@@ -140,6 +188,9 @@ class Sly:
         time.sleep(2)
 
     def run(self):
+        """
+        Driver for game engine
+        """
         pygame.display.set_caption('Slytherin')
 
         dx_rst = 0
