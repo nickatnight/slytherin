@@ -21,7 +21,7 @@ class Sly:
             white: the color of snake
             dx: position of snake on the x-axis
             dy: position of snake on the y-axis
-            snakelist: holds coords of each block in snakes boundry_check
+            snakelist: holds coords of each block in snakes body
             speed: speed of snake
             direction: direction the snake is moving
             img: png of snake head
@@ -49,6 +49,7 @@ class Sly:
         self.apple_x = None
         self.apple_y = None
         self.score = 0
+        self.game_over = False
 
     def snake(self):
         """
@@ -72,7 +73,7 @@ class Sly:
 
         for seg in self.snakelist[:-2]:
             if seg == snakeHead:
-                exit_game = True
+                self.game_over = True
 
         for d in dir_dict.keys():
             if self.direction == d:
@@ -122,9 +123,8 @@ class Sly:
         Loop for game animation and play
         """
         clock = pygame.time.Clock()
-        exit_game = False
-        game_over = False
         axis = None
+        game_exit = False
 
         key_list = {
             'left': [pygame.K_LEFT, 'y'],
@@ -133,59 +133,86 @@ class Sly:
             'down': [pygame.K_DOWN, 'x']
         }
 
-        while not exit_game:
-            for event in pygame.event.get():
-                #print self.score
-                if event.type == pygame.QUIT:
-                    exit_game = True
-                if event.type == pygame.KEYDOWN:
-                    if axis != 'y':
-                        if event.key == pygame.K_LEFT:
-                            self.direction = "left"
-                            dx_rst = -block
-                            dy_rst = 0
-                            axis = 'y'
-                        elif event.key == pygame.K_RIGHT:
-                            self.direction = "right"
-                            dx_rst = block
-                            dy_rst = 0
-                            axis = 'y'
-                    if axis != 'x':
-                        if event.key == pygame.K_UP:
-                            self.direction = "up"
-                            dy_rst = -block
-                            dx_rst = 0
-                            axis = 'x'
-                        elif event.key == pygame.K_DOWN:
-                            self.direction = "down"
-                            dy_rst = block
-                            dx_rst = 0
-                            axis = 'x'
+        while not game_exit:
+            while not self.game_over:
+                for event in pygame.event.get():
+                    #print self.score
+                    if event.type == pygame.QUIT:
+                        self.game_over = True
+                    if event.type == pygame.KEYDOWN:
+                        if axis != 'y':
+                            if event.key == pygame.K_LEFT:
+                                self.direction = "left"
+                                dx_rst = -block
+                                dy_rst = 0
+                                axis = 'y'
+                            elif event.key == pygame.K_RIGHT:
+                                self.direction = "right"
+                                dx_rst = block
+                                dy_rst = 0
+                                axis = 'y'
+                        if axis != 'x':
+                            if event.key == pygame.K_UP:
+                                self.direction = "up"
+                                dy_rst = -block
+                                dx_rst = 0
+                                axis = 'x'
+                            elif event.key == pygame.K_DOWN:
+                                self.direction = "down"
+                                dy_rst = block
+                                dx_rst = 0
+                                axis = 'x'
 
-            exit_game = self.boundry_check()
+                self.game_over = self.boundry_check()
 
-            self.dy += dy_rst
-            self.dx += dx_rst
+                self.dy += dy_rst
+                self.dx += dx_rst
 
+                self.pallet.fill((0, 0, 0))
+
+                self.apple("place")
+
+                self.snake()
+
+                surfScore = pygame.font.SysFont("Arial", 20, bold=True).render(str(self.score), True, self.white)
+                self.pallet.blit(surfScore, (10,10))
+                
+                pygame.display.update()
+
+                self.apple("check")
+
+                clock.tick(self.speed)
+
+            self.game_menu.show("lose")
+
+            pygame.display.update()
+            time.sleep(2)
             self.pallet.fill((0, 0, 0))
-
-            self.apple("place")
-
-            self.snake()
-
-            surfScore = pygame.font.SysFont("Arial", 20, bold=True).render(str(self.score), True, self.white)
-            self.pallet.blit(surfScore, (10,10))
-            
+            self.game_menu.show("gameover")
             pygame.display.update()
 
-            self.apple("check")
-
-            clock.tick(self.speed)
-
-        self.game_menu.show("lose")
-
-        pygame.display.update()
-        time.sleep(2)
+            # wait for player input
+            while self.game_over:                
+                print 'last loop'
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        game_exit = True
+                        self.game_over = False
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_q:
+                            game_exit = True
+                            self.game_over = False
+                        if event.key == pygame.K_c:
+                            game_exit = False
+                            self.game_over = False
+                            self.pallet.fill((0, 0, 0))
+                            #axis = None
+                            self.dx = 100
+                            self.dy = 100
+                            self.snakelist = []
+                            self.snakeLength = 2
+                            self.speed = 10
+                            self.score = 0
 
     def run(self):
         """

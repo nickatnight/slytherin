@@ -41,8 +41,9 @@ class Menu:
             self.center_text("You Lose.")
         elif menu_type == "greet":
             self.greet_menu()
-        elif menu_type == "opt":
-            self.op_menu()
+        elif menu_type == "gameover":
+            self.center_text("Game over. Press c to")
+            self.center_text("continue or q to quit.",30)
 
     def greet_menu(self):
         pass
